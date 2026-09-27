@@ -1,0 +1,1565 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Find Niche Aesthetics</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🫧</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ---------- Tokens ---------- */
+:root{
+  --ink:#2b2340; --ink-soft:#6b6385;
+  --menu-bg:#fff2f6; --menu-line:#f3d6e2;
+  --hl-bg:#fbd8e7; --hl-ink:#c2255c;
+  --btn:#2b2340; --btn-ink:#fff;
+  --bubble-tint:rgba(252,206,226,.55); --bubble-line:#e0679b; --bubble-line-strong:#b3134f;
+  --line:rgba(214,51,132,.26);
+  --panel-w:360px;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --font:"Comfortaa",ui-rounded,"Varela Round","Nunito",system-ui,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+body{background:#fff;color:var(--ink);font-family:var(--font);overflow:hidden}
+button,input{font-family:var(--font)}
+[hidden]{display:none !important}
+:is(button,a,input):focus-visible{outline:2px solid var(--hl-ink);outline-offset:2px}
+.app{position:relative;height:100%;overflow:hidden}
+
+/* ---------- Top bar ---------- */
+header{
+  position:absolute;z-index:8;top:0;left:0;right:0;
+  padding:calc(env(safe-area-inset-top,0px) + 12px) clamp(14px,3vw,32px) 12px;
+  background:#fff;border-bottom:1px solid var(--menu-line);
+}
+.bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.wordmark{font-weight:700;font-size:1.3rem;white-space:nowrap;margin:0}
+nav{display:flex;gap:4px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+.nav-btn{
+  border:none;background:none;color:var(--ink);cursor:pointer;white-space:nowrap;
+  font-weight:700;font-size:.86rem;letter-spacing:.02em;
+  padding:.7em .9em;border-radius:5px;display:inline-flex;align-items:center;gap:6px;
+}
+.nav-btn:hover{background:var(--menu-bg)}
+.nav-btn.active{background:var(--hl-bg);color:var(--hl-ink)}
+.caret{font-size:.6rem;transition:transform .2s}
+.nav-btn[aria-expanded="true"] .caret{transform:rotate(180deg)}
+.pill{border:none;border-radius:999px;background:var(--btn);color:var(--btn-ink);font-weight:600;font-size:.85rem;padding:.7em 1.2em;cursor:pointer;white-space:nowrap}
+.pill.light{background:var(--menu-bg);color:var(--ink);border:1px solid var(--menu-line)}
+.pill.light[aria-pressed="false"]{color:#bdb4cc}
+.pill{display:inline-flex;align-items:center;gap:7px}
+.ico{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pill.light[aria-pressed="true"]{background:var(--hl-bg);border-color:var(--hl-bg);color:var(--hl-ink)}
+.seg{display:inline-flex;border:1px solid var(--menu-line);border-radius:999px;padding:3px;background:var(--menu-bg)}
+.seg button{display:inline-flex;align-items:center;gap:6px;border:none;background:none;color:#bdb4cc;font-weight:600;font-size:.8rem;padding:.5em 1em;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--hl-ink);box-shadow:0 1px 4px rgba(90,30,60,.12)}
+@media (max-width:700px){
+  .bar{gap:8px}
+  .wordmark{flex:1}
+  nav{order:3;flex-basis:100%;margin:0 -6px}
+}
+
+/* ---------- Dropdown + context menu ---------- */
+.menu{
+  position:fixed;z-index:20;display:none;background:var(--menu-bg);border:1px solid var(--menu-line);
+  border-radius:16px;box-shadow:0 12px 30px rgba(90,30,60,.14);padding:8px;overflow-y:auto;
+}
+.menu.show{display:block}
+#dropdown{min-width:210px;max-width:min(300px,calc(100vw - 24px))}
+#ctx{z-index:25;min-width:170px;padding:6px}
+.dd-item{display:block;width:100%;text-align:left;border:none;background:none;color:var(--ink);font-size:.81rem;line-height:1.3;padding:.8em 1em;border-radius:4px;cursor:pointer}
+.dd-item:hover{background:rgba(251,216,231,.6)}
+.dd-item.active{background:var(--hl-bg);color:var(--hl-ink)}
+.dd-head{padding:.9em 1em .35em;font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.dd-filter{display:block;width:100%;margin:2px 0 6px;border:1px solid var(--menu-line);background:#fff;border-radius:10px;padding:.65em .9em;font-size:.8rem;color:var(--ink);outline:none}
+.dd-filter:focus{border-color:var(--hl-ink)}
+
+/* ---------- Current view info + pager ---------- */
+.view-info{
+  position:absolute;z-index:5;left:clamp(14px,3vw,32px);right:clamp(14px,3vw,32px);top:calc(var(--top-h,64px) + 12px);
+  pointer-events:none;transition:right .35s var(--ease);
+}
+.grid-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}
+.grid-head #moodBtn{flex:none}
+.grid-wrap .view-info{position:static;pointer-events:auto;flex:1;min-width:0}
+.app.panel-open .view-info{right:calc(var(--panel-w) + 14px)}
+.view-label{margin:0 2px;color:var(--ink-soft);font-size:.85rem}
+.view-label b{color:var(--ink);font-weight:600}
+.view-desc{margin:6px 2px 0;max-width:70ch;color:var(--ink-soft);font-size:.8rem;line-height:1.55}
+.pager{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px;pointer-events:auto}
+.pager-count{font-size:.8rem;color:var(--ink-soft)}
+.pager-pages{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.pg{min-width:32px;height:32px;padding:0 8px;border-radius:999px;border:1px solid var(--menu-line);background:#fff;color:var(--ink);font-weight:600;font-size:.78rem;cursor:pointer}
+.pg:hover{background:var(--menu-bg)}
+.pg.current{background:var(--hl-bg);border-color:var(--hl-bg);color:var(--hl-ink)}
+.pg:disabled{opacity:.35;cursor:default;background:#fff}
+.pg-gap{color:var(--ink-soft);font-size:.8rem;padding:0 2px}
+
+/* ---------- Masonry grid ---------- */
+.grid-wrap{
+  position:absolute;z-index:3;left:0;right:0;top:var(--top-h,64px);bottom:0;overflow-y:auto;
+  padding:16px clamp(14px,3vw,32px) 90px;transition:right .35s var(--ease);
+}
+.app.panel-open .grid-wrap{right:var(--panel-w)}
+.grid{display:flex;gap:16px;align-items:flex-start}
+.grid-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:16px}
+.card{
+  display:block;width:100%;margin:0;padding:0;text-align:left;
+  border:1px solid var(--menu-line);border-radius:6px;background:#fff;overflow:hidden;cursor:pointer;
+  color:var(--ink);-webkit-touch-callout:none;animation:fadeUp .4s ease both;transition:box-shadow .2s,border-color .2s;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}}
+.card.settled{animation:none}
+.card:hover{box-shadow:0 8px 22px rgba(120,40,80,.12)}
+.card.selected{border-color:var(--hl-ink);box-shadow:0 0 0 3px rgba(214,51,132,.18)}
+.card-img{display:block;background:var(--menu-bg);aspect-ratio:4/3}
+.card-img.loaded{aspect-ratio:auto;background:none}
+.card-img.empty{aspect-ratio:3/1}
+.card-img.square{aspect-ratio:1/1}
+.card-img.square img{height:100%;object-fit:cover}
+.card-img img{display:block;width:100%;height:auto}
+.card-title{display:block;padding:10px 12px 12px;font-weight:700;font-size:.85rem;line-height:1.3}
+.card-title{position:relative}
+.card.bookmarked .card-title{padding-right:30px}
+.card.bookmarked .card-title::after{content:"";position:absolute;right:10px;top:10px;width:14px;height:14px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23c2255c'%3E%3Cpath d='M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z'/%3E%3C/svg%3E") center/contain no-repeat}
+
+/* ---------- Bubbles ---------- */
+#stage{position:absolute;inset:0;z-index:2;touch-action:none;cursor:grab}
+#stage.dragging{cursor:grabbing}
+#world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+#links{position:absolute;left:0;top:0;width:1px;height:1px;overflow:visible;pointer-events:none}
+#links line{stroke:var(--line);stroke-width:1.5;stroke-linecap:round}
+.bubble{
+  position:absolute;left:0;top:0;overflow:hidden;
+  border:1.5px solid var(--bubble-line);border-radius:50%;background:#fff;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  color:var(--ink);font-weight:700;line-height:1.15;
+  cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
+  box-shadow:0 8px 22px rgba(120,40,80,.10);will-change:transform;
+}
+.bubble .img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .6s;pointer-events:none}
+.bubble .img.ready{opacity:.45}
+.bubble .tint{position:absolute;inset:0;background:var(--bubble-tint);pointer-events:none;z-index:1}
+.bubble .label{position:relative;z-index:2;display:block;width:100%;hyphens:none;-webkit-hyphens:none;overflow-wrap:normal;word-break:keep-all;text-shadow:0 0 6px #fff,0 0 12px rgba(255,255,255,.9)}
+.bubble.selected{border:2.5px solid var(--bubble-line-strong);box-shadow:0 0 0 4px rgba(214,51,132,.16),0 10px 28px rgba(120,40,80,.18)}
+.bubble.expanded::after{content:"";position:absolute;z-index:3;bottom:12%;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:currentColor;opacity:.45}
+.bubble.bookmarked::before{content:"";position:absolute;z-index:3;top:8%;left:50%;transform:translateX(-50%);width:14px;height:14px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23c2255c'%3E%3Cpath d='M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z'/%3E%3C/svg%3E") center/contain no-repeat}
+.bubble.loading{animation:breathe 1s ease-in-out infinite}
+.bubble.born{animation:grow .9s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes breathe{50%{opacity:.5}}
+@keyframes grow{from{scale:.05;opacity:.2}}
+.spark{position:fixed;z-index:9;width:7px;height:7px;border-radius:50%;pointer-events:none}
+
+/* ---------- Side panel ---------- */
+aside{
+  position:absolute;z-index:6;right:0;top:var(--top-h,64px);bottom:0;width:var(--panel-w);max-width:100%;
+  background:#fff;border-left:1px solid var(--menu-line);box-shadow:-10px 0 30px rgba(90,30,60,.06);
+  padding:18px 18px calc(env(safe-area-inset-bottom,0px) + 20px);overflow-y:auto;
+  transform:translateX(calc(100% + 32px));transition:transform .35s var(--ease);
+}
+aside.open{transform:none}
+.close{position:absolute;top:26px;right:26px;z-index:1;width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,.9);color:var(--ink);font-size:1.1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.back{display:inline-flex;gap:6px;border:none;background:none;color:var(--hl-ink);font-weight:700;font-size:.82rem;padding:4px 0 12px;cursor:pointer;max-width:calc(100% - 44px)}
+.back span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.photo{display:block;width:100%;aspect-ratio:4/3;border-radius:14px;overflow:hidden;background:var(--menu-bg)}
+.photo.pending{animation:breathe 1.4s ease-in-out infinite}
+.photo.moodboard{aspect-ratio:1/1}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-note{margin:6px 2px 0;font-size:.7rem;color:var(--ink-soft)}
+aside h2{font-weight:700;font-size:1.6rem;line-height:1.1;margin:16px 0 10px}
+aside dl{margin:12px 0 0}
+aside dt{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-top:14px;font-weight:700}
+aside dd{margin:5px 0 0;line-height:1.55;font-size:.9rem}
+.summary{line-height:1.6;font-size:.9rem;color:var(--ink-soft);margin:0}
+.chips,.related{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;border:1px solid var(--menu-line);border-radius:999px;padding:3px 10px 3px 4px}
+.chip i{width:16px;height:16px;border-radius:50%;border:1px solid rgba(0,0,0,.12)}
+.rel{border:1px solid var(--menu-line);background:var(--menu-bg);color:var(--ink);border-radius:999px;padding:.45em .9em;font-weight:600;font-size:.8rem;cursor:pointer}
+.rel:hover{border-color:var(--hl-ink);color:var(--hl-ink)}
+.rel.busy{opacity:.5;cursor:progress}
+.rel:disabled{opacity:.4;text-decoration:line-through;cursor:default}
+.panel-status{margin-top:12px;font-size:.84rem;color:var(--ink-soft)}
+.panel-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;align-items:center}
+.ghost{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--menu-line);background:var(--menu-bg);color:var(--ink);border-radius:999px;padding:.55em 1em;font-size:.85rem;cursor:pointer}
+.wiki-link{color:var(--hl-ink);font-weight:700;font-size:.9rem}
+
+/* ---------- Footer, toast, status ---------- */
+footer{
+  position:absolute;z-index:4;left:0;right:0;bottom:0;
+  padding:8px clamp(14px,3vw,32px) calc(env(safe-area-inset-bottom,0px) + 8px);
+  background:rgba(255,255,255,.95);border-top:1px solid var(--menu-line);
+  font-size:.72rem;color:var(--ink-soft);line-height:1.5;transition:right .35s var(--ease);
+}
+footer p{margin:0}
+footer a{color:inherit}
+.hint{color:var(--ink)}
+.app.panel-open footer{right:var(--panel-w)}
+.toast{
+  position:absolute;z-index:30;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 70px);
+  transform:translate(-50%,20px);opacity:0;pointer-events:none;
+  background:var(--btn);color:var(--btn-ink);border-radius:999px;padding:.7em 1.2em;font-size:.88rem;
+  transition:opacity .25s,transform .25s;max-width:calc(100% - 32px);text-align:center;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.status{position:absolute;z-index:1;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;color:var(--ink-soft);font-size:clamp(1rem,2.4vw,1.3rem);padding:0 24px;pointer-events:none;line-height:1.5}
+
+@media (max-width:700px){
+  :root{--panel-w:0px}
+  aside{left:0;width:auto;top:auto;max-height:min(58%,calc(100% - var(--top-h,110px)));border-left:none;border-top:1px solid var(--menu-line);border-radius:20px 20px 0 0;transform:translateY(calc(100% + 40px))}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="bar">
+      <p class="wordmark">Find Niche Aesthetics</p>
+      <nav id="nav" aria-label="Views">
+        <button class="nav-btn" data-menu="color" aria-haspopup="true" aria-expanded="false">Color <span class="caret">▼</span></button>
+        <button class="nav-btn" data-menu="era" aria-haspopup="true" aria-expanded="false">Era <span class="caret">▼</span></button>
+        <button class="nav-btn" data-menu="region" aria-haspopup="true" aria-expanded="false">Region <span class="caret">▼</span></button>
+        <button class="nav-btn" data-menu="tags" aria-haspopup="true" aria-expanded="false">Additional Tags <span class="caret">▼</span></button>
+        <button class="nav-btn" data-view="bookmarks">Bookmarks</button>
+      </nav>
+      <div class="seg" role="group" aria-label="Layout">
+        <button type="button" data-layout="bubbles" aria-pressed="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="9" r="5"/><circle cx="17.5" cy="16" r="4"/><circle cx="17.5" cy="5" r="2"/></svg>Bubbles</button>
+        <button type="button" data-layout="grid" aria-pressed="false"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Grid</button>
+      </div>
+      <button class="pill light" id="fitBtn" hidden>Fit view</button>
+      <button class="pill" id="shuffle"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><path d="m18 2 4 4-4 4"/><path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2"/><path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8"/><path d="m18 14 4 4-4 4"/></svg>Discover random</button>
+    </div>
+  </header>
+
+  <div class="menu" id="dropdown" role="menu"></div>
+  <div class="menu" id="ctx" role="menu"></div>
+
+  <div class="status" id="status">Loading aesthetics…</div>
+
+  <div class="view-info" id="viewInfo">
+    <p class="view-label" id="viewLabel">Showing <b>Random</b></p>
+    <p class="view-desc" id="viewDesc" hidden></p>
+    <div class="pager" id="pager" hidden>
+      <span class="pager-count" id="pagerCount"></span>
+      <div class="pager-pages" id="pagerPages" role="navigation" aria-label="Pages"></div>
+    </div>
+  </div>
+
+  <div class="grid-wrap" id="gridWrap">
+    <div class="grid-head" id="gridHead">
+      <button class="pill light" id="moodBtn" aria-pressed="false"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>Moodboard mode</button>
+    </div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div id="stage">
+    <div id="world"><svg id="links" aria-hidden="true"></svg></div>
+  </div>
+
+  <aside id="panel" aria-live="polite">
+    <button class="close" id="closePanel" aria-label="Close">×</button>
+    <div id="panelBody"></div>
+  </aside>
+
+  <div class="toast" id="toast" role="status"></div>
+  <footer>
+    <p class="hint" id="hint"></p>
+    <p>Data and images from the <a href="https://aesthetics.fandom.com/wiki/Aesthetics_Wiki" target="_blank" rel="noopener">Aesthetics Wiki</a>, CC BY-SA.</p>
+  </footer>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* =====================================================================
+   1. Config and menu data
+   ===================================================================== */
+const WIKI = 'https://aesthetics.fandom.com';
+const API = WIKI + '/api.php';
+const RANDOM_COUNT = 10;
+const MIN_RELATED = 5, MAX_RELATED = 7;
+const PAGE_LIMIT = 60, PAGE_SIZE = 30;   // views above PAGE_LIMIT are shown PAGE_SIZE at a time
+const SETTLE_MS = 3000;                   // bubbles move for this long, then freeze
+const GAP = 10;                           // minimum space between bubbles, in world pixels
+const SKIP_TITLE = /^(list of|aesthetics wiki|main page|visual index)|\(disambiguation\)$|^(music|fashion|philosophy|visuals)$/i;
+const EXCLUDE = /blending|^\s*cari\s*$|wiki-coined|^(music|fashion|philosophy|visuals)$/i;
+const STORE = { bookmarks:'aesthetic-drift-bookmarks', mood:'fna-moodboard-mode' };
+
+// Used if the wiki's navigation menu can't be read
+const FALLBACK_CATEGORIES = ['Internet Aesthetics','Subcultures','Fashion Styles','Music Genres','Microtrends','Art Movements',
+  'Design Aesthetics','Genre Fiction','Character Tropes','Seasonal'];
+
+// Wiki categories. Each entry is a label, or [label, [categories to combine]], or a { header }.
+const ERA = ['2020s','2010s','2000s','1990s','1980s','1970s','1960s','1950s','1940s','1930s','1920s','1910s','1900s','1890s',
+  '19th Century','18th Century','17th Century','16th Century','15th Century'];
+const COLORS = ['Red','Orange','Yellow','Gold','Green','Teal','Blue','Purple','Pink','Beige','Cream','Tan','Brown','White','Silver',
+  ['Grey',['Grey','Gray']],'Black','Grayscale',['Pastels',['Pastels','Pastel']],'Neon','Mutes','Rainbow','Holographic','Iridescent'];
+const REGIONS = [
+  { header:'Continents' }, 'Africa','Americas','Asia','Europe','Oceania',
+  { header:'Countries and cultures' },
+  'African-American','American','Arabic','Argentine','Australian','Austrian','Basque','Belgian','Botswanan','Brazilian','Breton',
+  'British','Cambodian','Canadian','Catalan','Chilean','Chinese','Congolese','Cornish','Czech','Danish','Dutch','English','Filipino',
+  'Finnish','French','Galician','German',['India',['Indian','India']],'Indigenous','Indonesian','Irish','Italian','Jamaican','Japanese','Kenyan','Lithuanian',
+  'Mexican','New Zealand','Nigerian','Norwegian','Peruvian','Polish','Portuguese','Romanian','Russian','Scottish','Singaporean',
+  'South African','South Korean','Soviet','Spanish','Swedish','Swiss','Ukrainian','Yugoslav',
+  { header:'Other' }, 'Location-based Aesthetics'];
+const TAGS = ['Academia','Ancient History','Androgynous','Anime','Architectural Styles','Architecture','Basic','Buddhist','CGI',
+  'Car Culture','Chic','Christian','City','Classical','Coastal Prefix','Concepts','Coquette','Core Suffix','Corporate','Creepy',
+  'Cultural Nostalgia','Cute','Digital','Drugs','Elegant','Fairy','Fantasy','Feminine','Food and Drink','Frutiger Family',
+  'Futuristic','Gaming','Girl','Glamour','Glitter','Goth','Gothic','Grunge','Gyaru','Heisei Retro','Hip-Hop','Historical','Horror',
+  'Humoristic','Hyperpop','Industrial','Interior design','Internet Culture','Islamic','Ism suffix','Kawaii','Kei Suffix','Kitsch',
+  'LGBTQ','Lifestyle','Lolita','Mainstream','Masculine','Mature','Maximalism','Media and Expression','Memes','Metal','Middle Ages',
+  'Militaristic','Minimalism','Nature','Nautical','Nightlife and Parties','Nostalgia-based Aesthetics','Oceans and islands',
+  'Pagan','Performance Art','Political','Preppy','Punk','Punk Suffix','Rave Culture','Retro','Rhythm Game Aesthetics',
+  'Satanic-Inspired','Schools, bookstores, and libraries','Science','Sexy','Shock Value','Skinhead','Soft','Space','Sports',
+  'Stereotypes','Streetwear','Suburbia','Synthwave','Tropical','Vacation, amusement, and recreation','Vaporwave','Victorian',
+  'Vintage','Wave Suffix','Wealthy','Working Class','Y2K','Youthful'];
+
+/** Title Case for display: capitalises each word (and after - / ( ), keeping small joining words lowercase. */
+const SMALL_WORDS = new Set(['a','an','and','as','at','but','by','for','from','in','into','of','on','or','the','to','vs','with']);
+function titleCase(s){
+  const words = String(s).split(' ');
+  return words.map((w, i) => {
+    if (i > 0 && i < words.length - 1 && SMALL_WORDS.has(w.toLowerCase())) return w.toLowerCase();
+    return w.replace(/(^|[-\/(])([a-z])/g, (_, pre, ch) => pre + ch.toUpperCase());
+  }).join(' ');
+}
+const toItems = (list) => list.map(e => {
+  if (e.header) return e;
+  const [label, cats] = Array.isArray(e) ? e : [e, [e]];
+  return { label, targets:cats.map(c => 'Category:' + c) };
+});
+const MENU_NAMES = { color:'Color', era:'Era', region:'Region', tags:'Tag' };
+const menus = { color:toItems(COLORS), era:toItems(ERA), region:toItems(REGIONS), tags:[] };
+let navCategories = FALLBACK_CATEGORIES.map(label => ({ label, target:null }));
+let navFamilies = [];
+
+/* =====================================================================
+   2. Wiki API and data
+   ===================================================================== */
+async function api(params){
+  const u = new URL(API);
+  for (const [k, v] of Object.entries({ ...params, format:'json', formatversion:'2', origin:'*' })) u.searchParams.set(k, v);
+  const r = await fetch(u);
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const j = await r.json();
+  if (j.error) throw new Error(j.error.info || 'API error');
+  return j;
+}
+/** Follows "continue" tokens, gathering results with pick(json). */
+async function collect(base, pick, maxCalls = 12){
+  const out = []; let cont = {}; let n = 0;
+  while (cont && n++ < maxCalls){
+    const j = await api({ ...base, ...cont });
+    out.push(...pick(j));
+    cont = j.continue || null;
+  }
+  return out;
+}
+const contentOf = (page) => { const r = page?.revisions?.[0]; return r?.slots?.main?.content ?? r?.content ?? ''; };
+/** Maps a requested title to its final title, following normalisation and redirects. */
+function resolver(query){
+  const alias = new Map();
+  (query?.normalized || []).forEach(x => alias.set(x.from, x.to));
+  (query?.redirects || []).forEach(x => alias.set(x.from, x.to));
+  return (t) => { let g = 0; while (alias.has(t) && g++ < 5) t = alias.get(t); return t; };
+}
+const chunks = (arr, n = 50) => { const out = []; for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n)); return out; };
+
+let allTitles = [];
+const knownLower = new Map();   // lowercased title -> canonical title
+const cache = new Map();        // title (or alias) -> parsed info, or null if missing
+
+async function loadTitleList(){
+  let titles = await collect({ action:'query', list:'categorymembers', cmtitle:'Category:Aesthetics', cmnamespace:'0', cmlimit:'500' },
+    j => (j.query?.categorymembers || []).map(p => p.title));
+  if (titles.length < 30){
+    titles = await collect({ action:'query', list:'allpages', apnamespace:'0', apfilterredir:'nonredirects', aplimit:'500' },
+      j => (j.query?.allpages || []).map(p => p.title));
+  }
+  allTitles = [...new Set(titles)].filter(t => !SKIP_TITLE.test(t));
+  knownLower.clear();
+  allTitles.forEach(t => knownLower.set(t.toLowerCase(), t));
+}
+
+async function categoryMembers(cat){
+  const members = await collect({ action:'query', list:'categorymembers', cmtitle:cat, cmlimit:'500', cmtype:'page|subcat' },
+    j => j.query?.categorymembers || []);
+  const pages = members.filter(m => m.ns === 0).map(m => m.title);
+  if (pages.length < 10){
+    for (const sub of members.filter(m => m.ns === 14).slice(0, 12)){
+      pages.push(...await collect({ action:'query', list:'categorymembers', cmtitle:sub.title, cmlimit:'500', cmnamespace:'0' },
+        j => (j.query?.categorymembers || []).map(m => m.title), 3));
+    }
+  }
+  return [...new Set(pages)].filter(t => !SKIP_TITLE.test(t));
+}
+
+async function pageLinks(title){
+  const links = await collect({ action:'query', prop:'links', titles:title, plnamespace:'0', pllimit:'max', redirects:'1' },
+    j => (j.query?.pages || []).flatMap(p => (p.links || []).map(l => l.title)), 6);
+  let out = [...new Set(links)].filter(t => !SKIP_TITLE.test(t));
+  const known = [...new Set(out.map(t => knownLower.get(t.toLowerCase())).filter(Boolean))];
+  return known.length >= 5 ? known : out;
+}
+
+/** Fetches and parses pages, 50 per request. Returns Map(requested title -> info|null). */
+async function getPages(titles){
+  for (const chunk of chunks(titles.filter(t => !cache.has(t)))){
+    const j = await api({ action:'query', prop:'revisions', rvprop:'content', rvslots:'main', titles:chunk.join('|'), redirects:'1' });
+    const resolve = resolver(j.query);
+    const byTitle = new Map();
+    for (const p of (j.query?.pages || [])){
+      if (!p.missing && !p.invalid) byTitle.set(p.title, parsePage(p.title, contentOf(p)));
+    }
+    for (const t of chunk){
+      const info = byTitle.get(resolve(t)) || null;
+      cache.set(t, info);
+      if (info) cache.set(info.title, info);
+    }
+  }
+  return new Map(titles.map(t => [t, cache.get(t) ?? null]));
+}
+
+/** Thumbnail URLs for file names, in batches. */
+async function fileUrls(files, width){
+  const out = new Map();
+  for (const chunk of chunks(files)){
+    const j = await api({ action:'query', titles:chunk.map(f => 'File:' + f).join('|'), prop:'imageinfo', iiprop:'url', iiurlwidth:String(width) });
+    const resolve = resolver(j.query);
+    const urls = new Map((j.query?.pages || []).map(p => [p.title, p.imageinfo?.[0]?.thumburl || p.imageinfo?.[0]?.url || null]));
+    chunk.forEach(f => out.set(f, urls.get(resolve('File:' + f)) || null));
+  }
+  return out;
+}
+/** The wiki's own "main image" for pages, in batches. */
+async function pageImageUrls(titles, width){
+  const out = new Map();
+  for (const chunk of chunks(titles)){
+    const j = await api({ action:'query', titles:chunk.join('|'), prop:'pageimages', piprop:'thumbnail', pithumbsize:String(width), pilimit:'50' });
+    (j.query?.pages || []).forEach(p => out.set(p.title, p.thumbnail?.source || null));
+  }
+  return out;
+}
+
+/** Small cover images for cards and bubbles. */
+async function loadThumbs(infos){
+  const need = infos.filter(i => i && i.thumbUrl === undefined);
+  if (!need.length) return;
+  try{
+    const withFile = need.filter(i => i.imageFile);
+    const byFile = await fileUrls([...new Set(withFile.map(i => i.imageFile))], 320);
+    withFile.forEach(i => { i.thumbUrl = byFile.get(i.imageFile) || null; });
+    const rest = need.filter(i => !i.thumbUrl);
+    const byPage = await pageImageUrls(rest.map(i => i.title), 320);
+    rest.forEach(i => { i.thumbUrl = byPage.get(i.title) || null; });
+  }catch(e){ console.warn('Thumbnail lookup failed', e); }
+  need.forEach(i => { if (i.thumbUrl === undefined) i.thumbUrl = null; refreshImage(i); });
+  loadMoodThumbs(need);
+}
+/** Moodboard thumbnails, preferred over cover images in the grid. */
+async function loadMoodThumbs(infos){
+  await moodReady;
+  const need = infos.filter(i => i.moodThumb === undefined);
+  try{
+    const withMood = need.filter(i => MOOD.has(i.title.toLowerCase()));
+    const urls = await fileUrls([...new Set(withMood.map(i => MOOD.get(i.title.toLowerCase())))], 400);
+    withMood.forEach(i => { i.moodThumb = urls.get(MOOD.get(i.title.toLowerCase())) || null; });
+  }catch(e){ console.warn('Moodboard thumbnails failed', e); }
+  need.forEach(i => { if (i.moodThumb === undefined) i.moodThumb = null; cardThumb(i); });
+}
+
+/* Moodboards from the "Find Aesthetic by Image" page, keyed by lowercased aesthetic title */
+const MOOD = new Map();
+const IMG_RE = /(?:\[\[)?(?:File|Image)?:?\s*([^|\[\]\n=<>{}:]+?\.(?:jpe?g|png|gif|webp))/i;
+async function loadMoodboards(){
+  try{
+    const j = await api({ action:'query', prop:'revisions', rvprop:'content', rvslots:'main', titles:'Find Aesthetic by Image' });
+    const raw = new Map();
+    for (const line of contentOf(j.query?.pages?.[0]).split('\n')){
+      const fm = line.match(IMG_RE);
+      if (!fm) continue;
+      const rest = line.slice(fm.index + fm[0].length);
+      const lk = rest.match(/link\s*=\s*([^|\]\n]+)/i);
+      let name = (lk && wikiTarget(lk[1])) || linksIn(rest)[0] || clean((rest.split('|').pop() || '').split(/<br|\bfrom top\b/i)[0]);
+      if (name){ name = normTitle(name); if (!raw.has(name)) raw.set(name, normTitle(fm[1])); }
+    }
+    for (const chunk of chunks([...raw.keys()])){
+      const r = await api({ action:'query', titles:chunk.join('|'), redirects:'1' });
+      const resolve = resolver(r.query);
+      chunk.forEach(n => { MOOD.set(n.toLowerCase(), raw.get(n)); MOOD.set(resolve(n).toLowerCase(), raw.get(n)); });
+    }
+  }catch(e){ console.warn('Moodboards unavailable', e); }
+}
+const moodReady = loadMoodboards();
+
+/** Large panel image: the moodboard if there is one, otherwise the cover image. */
+async function loadPanelImage(info){
+  if (info.imageUrl !== undefined) return;
+  let url = null, kind = null;
+  try{
+    await moodReady;
+    const mood = MOOD.get(info.title.toLowerCase());
+    if (mood){ url = (await fileUrls([mood], 800)).get(mood); if (url) kind = 'moodboard'; }
+    if (!url && info.imageFile) url = (await fileUrls([info.imageFile], 700)).get(info.imageFile);
+    if (!url) url = (await pageImageUrls([info.title], 700)).get(info.title);
+    if (url && !kind) kind = 'cover';
+  }catch(e){ console.warn('Image lookup failed', e); }
+  info.imageUrl = url || null;
+  info.imageKind = kind;
+}
+
+/** Turns a menu item into a list of page titles. */
+async function resolveItem(item){
+  if (item.titles) return item.titles;
+  let titles = [];
+  if (item.targets){
+    for (const c of item.targets) titles.push(...await categoryMembers(c));
+  } else if (item.target && /^category:/i.test(item.target)){
+    titles = await categoryMembers(item.target);
+  } else if (item.target){
+    titles = await pageLinks(item.target);
+  }
+  if (titles.length < 3 && !item.targets){
+    const L = item.label;
+    const j = await api({ action:'query', prop:'categoryinfo', titles:[`Category:${L}`, `Category:${L} Aesthetics`, `Category:${L} aesthetics`].join('|') });
+    const best = (j.query?.pages || []).filter(p => p.categoryinfo?.pages).sort((a, b) => b.categoryinfo.pages - a.categoryinfo.pages)[0];
+    if (best) titles = await categoryMembers(best.title);
+    if (titles.length < 3 && !item.target) titles = await pageLinks(L);
+  }
+  item.titles = [...new Set(titles)];
+  return item.titles;
+}
+
+/** First line of a tag's category page, used to explain the tag. */
+async function describe(item){
+  if (item.desc !== undefined) return item.desc;
+  try{
+    const t = item.targets?.[0] || item.target || ('Category:' + item.label);
+    const j = await api({ action:'query', prop:'revisions', rvprop:'content', rvslots:'main', titles:t, redirects:'1' });
+    item.desc = firstLine(contentOf(j.query?.pages?.[0]));
+  }catch(e){ item.desc = ''; }
+  return item.desc;
+}
+
+/* =====================================================================
+   3. Wikitext parsing
+   ===================================================================== */
+function findTemplates(text, limit){
+  const out = []; let i = 0;
+  while (out.length < limit){
+    const s = text.indexOf('{{', i);
+    if (s < 0) break;
+    let depth = 0, j = s;
+    for (; j < text.length - 1; j++){
+      if (text[j] === '{' && text[j + 1] === '{'){ depth++; j++; }
+      else if (text[j] === '}' && text[j + 1] === '}'){ depth--; j++; if (!depth) break; }
+    }
+    if (depth) break;
+    out.push({ start:s, end:j + 1, inner:text.slice(s + 2, j - 1) });
+    i = j + 1;
+  }
+  return out;
+}
+function parseTemplate(inner){
+  const parts = []; let depth = 0, cur = '';
+  for (let i = 0; i < inner.length; i++){
+    const two = inner.slice(i, i + 2);
+    if (two === '{{' || two === '[['){ depth++; cur += two; i++; continue; }
+    if (two === '}}' || two === ']]'){ depth = Math.max(0, depth - 1); cur += two; i++; continue; }
+    if (inner[i] === '|' && !depth){ parts.push(cur); cur = ''; continue; }
+    cur += inner[i];
+  }
+  parts.push(cur);
+  const params = {};
+  for (const p of parts.slice(1)){
+    const m = p.match(/^\s*([^=\[\]{}|]+?)\s*=([\s\S]*)$/);
+    if (m) params[m[1].toLowerCase().replace(/[\s_]+/g, '')] = m[2].trim();
+  }
+  return { name:parts[0].trim(), params };
+}
+function field(params, subs, exclude = []){
+  for (const k of Object.keys(params)){
+    if (exclude.some(x => k.includes(x))) continue;
+    if (subs.some(s => k.includes(s)) && params[k]) return params[k];
+  }
+  return '';
+}
+function clean(s){
+  if (!s) return '';
+  s = s.replace(/<!--[\s\S]*?-->/g, '')
+       .replace(/<ref[^>]*\/>|<ref[^>]*>[\s\S]*?<\/ref>|<gallery[\s\S]*?<\/gallery>/gi, '')
+       .replace(/<br\s*\/?>/gi, ', ');
+  for (let k = 0; k < 20 && /\{\{[^{}]*\}\}/.test(s); k++) s = s.replace(/\{\{[^{}]*\}\}/g, '');
+  return s.replace(/\[\[(?:File|Image|Category):[^\]]*\]\]/gi, '')
+    .replace(/\[\[[^\]|]*\|([^\]]*)\]\]/g, '$1').replace(/\[\[([^\]]*)\]\]/g, '$1')
+    .replace(/\[https?:\/\/\S+\s([^\]]*)\]/g, '$1')
+    .replace(/'{2,}/g, '').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ')
+    .replace(/^\s*[*#:]+/gm, ', ').replace(/\s+/g, ' ').replace(/(\s*,\s*){2,}/g, ', ')
+    .trim().replace(/^,\s*|,\s*$/g, '');
+}
+function normTitle(t){
+  t = t.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+  return t ? t[0].toUpperCase() + t.slice(1) : t;
+}
+function linksIn(s){
+  const out = [], re = /\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|[^\]]*)?\]\]/g;
+  let m;
+  while ((m = re.exec(s))) if (!/^\s*[a-z ]+:/i.test(m[1])) out.push(normTitle(m[1]));
+  return out;
+}
+function wikiTarget(t){
+  if (!t) return null;
+  t = t.trim().replace(/^\[\[|\]\]$/g, '');
+  if (/^https?:/i.test(t)){
+    const m = t.match(/\/wiki\/([^?#]+)/);
+    if (!m || !t.includes('aesthetics.fandom.com')) return null;
+    t = decodeURIComponent(m[1]);
+  }
+  return (!t || t === '#' || /^special:/i.test(t)) ? null : normTitle(t);
+}
+const trimTo = (s, n) => s.length > n ? s.slice(0, n - 10).replace(/\s+\S*$/, '') + '…' : s;
+function firstLine(text){
+  let body = text.replace(/__[A-Z]+__/g, '').replace(/\{\|[\s\S]*?\|\}/g, '');
+  for (const t of findTemplates(body, 80).reverse()) body = body.slice(0, t.start) + body.slice(t.end);
+  for (const para of body.split(/\n\s*\n|\n(?=[=*#])/)){
+    const p = para.trim();
+    if (!p || p.startsWith('=') || /^(\[\[(File|Image|Category)|<gallery)/i.test(p)) continue;
+    const c = clean(p);
+    if (c.length > 15) return trimTo(c, 280);
+  }
+  return '';
+}
+const cssOk = (w) => w.length > 2 && window.CSS && CSS.supports('color', w);
+function parseColours(raw){
+  const out = [];
+  for (const p of clean(raw).split(/,|;|\/|\band\b|&/i).map(s => s.trim().toLowerCase()).filter(Boolean)){
+    const words = p.replace(/[^a-z\s-]/g, '').split(/[\s-]+/).filter(Boolean);
+    const joined = words.join('');
+    let base = cssOk(joined) ? joined : [...words].reverse().find(cssOk);
+    if (!base) continue;
+    if (base !== joined){
+      if (/pastel|light|pale|soft|baby/.test(p)) base = `color-mix(in srgb, ${base} 45%, white)`;
+      else if (/dark|deep|muted|dusty/.test(p)) base = `color-mix(in srgb, ${base} 65%, black)`;
+    }
+    out.push({ label:p, css:base });
+    if (out.length >= 6) break;
+  }
+  return out;
+}
+function parsePage(title, text){
+  let P = {}, boxEnd = 0;
+  for (const t of findTemplates(text.slice(0, 20000), 25)){
+    const pt = parseTemplate(t.inner);
+    if (/infobox/i.test(pt.name) || /related|decade|motif/.test(Object.keys(pt.params).join(' '))){ P = pt.params; boxEnd = t.end; break; }
+  }
+  const relRaw = field(P, ['related']);
+  let related = linksIn(relRaw);
+  if (!related.length && relRaw) related = clean(relRaw).split(/,|;/).map(normTitle).filter(Boolean);
+
+  // Aesthetics linked anywhere on the page, most-linked first (fallback for "related")
+  const counts = new Map();
+  for (const l of linksIn(text)){
+    const k = knownLower.get(l.toLowerCase());
+    if (k && k !== title) counts.set(k, (counts.get(k) || 0) + 1);
+  }
+
+  let summary = '';
+  for (const para of text.slice(boxEnd).replace(/\{\|[\s\S]*?\|\}/g, '').split(/\n\s*\n/)){
+    const p = para.trim();
+    if (!p || p.startsWith('=') || /^\[\[(File|Image)/i.test(p)) continue;
+    const c = clean(p);
+    if (c.length > 60){ summary = trimTo(c, 340); break; }
+  }
+
+  const imgRaw = P.image1 || P.image || P.mainimage || field(P, ['image'], ['caption', 'size', 'width']);
+  const imgMatch = (imgRaw && imgRaw.match(IMG_RE)) || (text.match(/\[\[(?:File|Image):[^\]|]+/i) || [''])[0].match(IMG_RE);
+  return {
+    title, summary,
+    decade: trimTo(clean(field(P, ['decade'])), 80),
+    origin: trimTo(clean(field(P, ['location'])), 80),
+    motifs: trimTo(clean(field(P, ['motif'])), 220),
+    values: trimTo(clean(field(P, ['values', 'keyvalue'])), 160),
+    colours: parseColours(field(P, ['colo'])),
+    related: [...new Set(related)].filter(t => t !== title),
+    pageLinks: [...counts.entries()].sort((a, b) => b[1] - a[1]).map(e => e[0]),
+    imageFile: imgMatch ? normTitle(imgMatch[1]) : null,
+    url: WIKI + '/wiki/' + encodeURIComponent(title.replace(/ /g, '_'))
+  };
+}
+
+/* =====================================================================
+   4. Menus from the wiki's own navigation
+   ===================================================================== */
+async function loadNav(){
+  try{
+    const j = await api({ action:'query', prop:'revisions', rvprop:'content', rvslots:'main', titles:'MediaWiki:Wiki-navigation' });
+    const root = { children:[] }, stack = [root], all = [];
+    for (const line of contentOf(j.query?.pages?.[0]).split('\n')){
+      const m = line.match(/^(\*+)\s*(.+)$/);
+      if (!m) continue;
+      const level = m[1].length, raw = m[2].trim(), bar = raw.indexOf('|');
+      const node = { label:clean(bar >= 0 ? raw.slice(bar + 1) : raw), target:wikiTarget(bar >= 0 ? raw.slice(0, bar) : raw), children:[] };
+      while (stack.length > level) stack.pop();
+      stack[stack.length - 1].children.push(node);
+      stack[level] = node;
+      all.push(node);
+    }
+    const find = (re) => all.find(n => re.test(n.label) && n.children.length);
+    const toList = (n) => n ? n.children.map(c => ({ label:c.label, target:c.target })) : [];
+    const cats = toList(find(/categor/i)), fams = toList(find(/famil/i));
+    if (cats.length) navCategories = cats;
+    navFamilies = fams;
+  }catch(e){ console.warn('Nav menu unavailable', e); }
+  if (!navFamilies.length){
+    try{
+      const j = await api({ action:'query', list:'search', srsearch:'family', srnamespace:'14', srlimit:'30' });
+      navFamilies = (j.query?.search || []).map(s => ({ label:s.title.replace(/^Category:/, ''), target:s.title }));
+    }catch(e){}
+  }
+  buildTags();
+}
+/** Additional tags: one alphabetical list of wiki categories, families and TAGS. */
+function buildTags(){
+  const seen = new Set();
+  menus.tags = [...navCategories, ...navFamilies, ...toItems(TAGS)].filter(i => {
+    const k = i.label.toLowerCase();
+    if (EXCLUDE.test(i.label) || seen.has(k)) return false;
+    seen.add(k); return true;
+  }).sort((a, b) => a.label.localeCompare(b.label));
+}
+buildTags();
+
+/* =====================================================================
+   5. Bookmarks
+   ===================================================================== */
+const store = {
+  get(k, fallback){ try{ const v = localStorage.getItem(k); return v === null ? fallback : JSON.parse(v); }catch(e){ return fallback; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+let bookmarks = store.get(STORE.bookmarks, []);
+if (!Array.isArray(bookmarks)) bookmarks = [];
+const isBookmarked = (t) => bookmarks.includes(t);
+function toggleBookmark(title){
+  const on = !isBookmarked(title);
+  bookmarks = on ? [...bookmarks, title] : bookmarks.filter(t => t !== title);
+  store.set(STORE.bookmarks, bookmarks);
+  toast(on ? `Bookmarked ${titleCase(title)}` : `Removed ${titleCase(title)} from bookmarks`);
+  nodes.get(title)?.el.classList.toggle('bookmarked', on);
+  cards.get(title)?.classList.toggle('bookmarked', on);
+  if (panelInfo?.title === title) renderPanel();
+}
+
+/* =====================================================================
+   6. Elements and view state
+   ===================================================================== */
+const $ = (id) => document.getElementById(id);
+const appEl = document.querySelector('.app');
+const headerEl = document.querySelector('header');
+const footerEl = document.querySelector('footer');
+const stage = $('stage'), world = $('world'), svg = $('links');
+const gridWrap = $('gridWrap'), gridEl = $('grid');
+const viewInfo = $('viewInfo'), viewLabel = $('viewLabel'), viewDesc = $('viewDesc');
+const pager = $('pager'), pagerCount = $('pagerCount'), pagerPages = $('pagerPages');
+const panel = $('panel'), panelBody = $('panelBody');
+const dropdown = $('dropdown'), ctx = $('ctx');
+const statusEl = $('status'), toastEl = $('toast'), hintEl = $('hint'), fitBtn = $('fitBtn'), moodBtn = $('moodBtn');
+const navBtns = [...document.querySelectorAll('.nav-btn')];
+const segBtns = [...document.querySelectorAll('.seg button')];
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let W = innerWidth, H = innerHeight;
+let layout = 'bubbles';          // always opens in bubbles
+let shown = [];                 // infos in the current view, shared by both layouts
+let moodOnly = store.get(STORE.mood, false) === true;   // grid filter: only aesthetics with moodboards
+let moodKnown = false;          // true once the moodboard list has loaded
+const nodes = new Map();        // title -> bubble
+const cards = new Map();        // title -> card element
+let links = [];
+let panelInfo = null, panelHistory = [];
+let current = { kind:'random' };
+let seedId = 0;
+
+function toast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => toastEl.classList.remove('show'), 2600);
+}
+function showStatus(t){ statusEl.hidden = !t; statusEl.textContent = t || ''; }
+const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+function sample(arr, k = arr.length){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a.slice(0, k);
+}
+
+function measureTop(){ document.documentElement.style.setProperty('--top-h', headerEl.offsetHeight + 'px'); }
+measureTop();
+if (window.ResizeObserver) new ResizeObserver(measureTop).observe(headerEl);
+addEventListener('resize', () => { W = innerWidth; H = innerHeight; closeMenus(); measureTop(); });
+
+/* ---------- Shared press handling: click opens the panel; right-click or long-press opens actions ---------- */
+function attachPress(el, info){
+  let lp = null, fired = false;
+  el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (fired){ fired = false; return; }
+    closeMenus();
+    openPanel(info);
+  });
+  el.addEventListener('contextmenu', (e) => { e.preventDefault(); e.stopPropagation(); openCtx(info, e.clientX, e.clientY); });
+  el.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse') return;
+    clearTimeout(lp);
+    lp = setTimeout(() => { fired = true; openCtx(info, e.clientX, e.clientY); }, 550);
+  });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => el.addEventListener(ev, () => clearTimeout(lp)));
+}
+
+/* ---------- Grid cards: alphabetical, laid out row by row across columns ---------- */
+const hasMood = (info) => MOOD.has(info.title.toLowerCase());
+function addCard(info){
+  const el = document.createElement('button');
+  el.type = 'button';
+  el.className = 'card' + (isBookmarked(info.title) ? ' bookmarked' : '') + (panelInfo?.title === info.title ? ' selected' : '');
+  el.innerHTML = '<span class="card-img"></span><span class="card-title"></span>';
+  el.querySelector('.card-title').textContent = titleCase(info.title);
+  el.addEventListener('animationend', () => el.classList.add('settled'), { once:true });
+  attachPress(el, info);
+  cards.set(info.title, el);
+  cardThumb(info);
+  scheduleGrid();
+}
+let gridQueued = false, gridColCount = 0;
+function scheduleGrid(){
+  if (gridQueued) return;
+  gridQueued = true;
+  requestAnimationFrame(() => { gridQueued = false; layoutGrid(); });
+}
+const gridColumns = () => Math.max(1, Math.floor((gridEl.clientWidth + 16) / 226));
+function layoutGrid(){
+  const visible = shown
+    .filter(i => cards.has(i.title) && (!moodOnly || (moodKnown && hasMood(i))))
+    .sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity:'base', numeric:true }));
+  gridColCount = gridColumns();
+  const cols = Array.from({ length:gridColCount }, () => { const c = document.createElement('div'); c.className = 'grid-col'; return c; });
+  visible.forEach((info, i) => cols[i % gridColCount].appendChild(cards.get(info.title)));
+  gridEl.replaceChildren(...cols);
+  renderLabel(visible.length);
+}
+if (window.ResizeObserver) new ResizeObserver(() => { if (layout === 'grid' && gridColumns() !== gridColCount) scheduleGrid(); }).observe(gridEl);
+moodReady.then(() => { moodKnown = true; if (layout === 'grid') scheduleGrid(); });
+
+function cardThumb(info){
+  const el = cards.get(info.title);
+  if (!el || info.thumbUrl === undefined || info.moodThumb === undefined) return;
+  const box = el.querySelector('.card-img');
+  const url = info.moodThumb || info.thumbUrl;
+  if (!url){ box.classList.add('empty'); return; }
+  if (box.firstChild) return;
+  if (!info.moodThumb) box.classList.add('square');   // cover images are cropped square
+  const img = new Image();
+  img.alt = ''; img.referrerPolicy = 'no-referrer'; img.decoding = 'async';
+  img.onload = () => box.classList.add('loaded');
+  img.onerror = () => { img.remove(); box.classList.add('empty'); };
+  img.src = url;
+  box.appendChild(img);
+}
+
+/* ---------- Bubbles ---------- */
+const radiusFor = (t) => 46 + Math.min(t.length, 24) * 0.95;
+function addNode(info, x, y, vx = 0, vy = 0){
+  const r = radiusFor(info.title);
+  const el = document.createElement('button');
+  el.type = 'button';
+  el.className = 'bubble born' + (isBookmarked(info.title) ? ' bookmarked' : '') + (panelInfo?.title === info.title ? ' selected' : '');
+  el.innerHTML = '<img class="img" alt="" referrerpolicy="no-referrer" decoding="async"><span class="tint"></span><span class="label"></span>';
+  el.setAttribute('aria-label', titleCase(info.title));
+  const px = (r * 2) + 'px';
+  Object.assign(el.style, { width:px, height:px, padding:Math.round(r * 0.28) + 'px' });
+  attachPress(el, info);
+  const n = { title:info.title, info, el, r, x, y, vx, vy, expanded:false, loading:false };
+  world.appendChild(el);
+  nodes.set(info.title, n);
+  bubbleThumb(n);
+  scheduleFonts();
+  return n;
+}
+function bubbleThumb(n){
+  const url = n.info.thumbUrl;
+  const img = n.el.querySelector('.img');
+  if (!url || !img || img.dataset.src === url) return;
+  img.dataset.src = url;
+  img.onload = () => img.classList.add('ready');
+  img.onerror = () => img.remove();
+  img.src = url;
+}
+function refreshImage(info){
+  const n = nodes.get(info.title);
+  if (n) bubbleThumb(n);
+  cardThumb(info);
+}
+
+/* Bubble names: every bubble uses one font size, the smallest any bubble needs so that
+   its longest word (or hyphenated part) fits on one line and the whole name fits inside */
+const measureCtx = document.createElement('canvas').getContext('2d');
+function fitSize(n){
+  const lab = n.el.querySelector('.label');
+  const name = titleCase(n.title);
+  const pieces = name.split(/ |(?<=-)/).filter(Boolean);   // lines may break at spaces or after hyphens
+  const avail = n.r * 2 - Math.round(n.r * 0.28) * 2 - 2;
+  if (lab.textContent !== name) lab.textContent = name;
+  let fs = Math.max(12, Math.min(16, Math.round(n.r * 0.3)));
+  for (; fs > 7; fs -= .5){
+    measureCtx.font = `700 ${fs}px Comfortaa, "Varela Round", sans-serif`;
+    lab.style.fontSize = fs + 'px';
+    const widest = Math.max(...pieces.map(w => measureCtx.measureText(w).width));
+    if (widest <= avail && lab.scrollHeight <= avail + 2) break;
+  }
+  return fs;
+}
+let fontsQueued = false;
+function scheduleFonts(){
+  if (fontsQueued) return;
+  fontsQueued = true;
+  requestAnimationFrame(() => {
+    fontsQueued = false;
+    if (!nodes.size) return;
+    const size = Math.min(...[...nodes.values()].map(fitSize));
+    nodes.forEach(n => { n.el.querySelector('.label').style.fontSize = size + 'px'; });
+  });
+}
+if (document.fonts?.ready) document.fonts.ready.then(scheduleFonts);
+
+/* Lines between bubbles that list each other as related */
+const canon = (t) => (cache.get(t)?.title || t).toLowerCase();
+function connectRelated(n){
+  const mine = new Set(n.info.related.map(canon));
+  const me = n.title.toLowerCase();
+  for (const m of nodes.values()){
+    if (m !== n && (mine.has(m.title.toLowerCase()) || m.info.related.some(t => canon(t) === me))) addLink(n, m);
+  }
+}
+function addLink(a, b){
+  if (a === b || links.some(l => (l.a === a && l.b === b) || (l.a === b && l.b === a))) return;
+  const el = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  svg.appendChild(el);
+  links.push({ a, b, el });
+}
+
+/* ---------- Adding and clearing aesthetics ---------- */
+/** Starting position for bubble i of count: a ring for small sets, a disc for large ones. */
+function spawnPos(i, count){
+  const ang = count <= 12 ? (i / count) * Math.PI * 2 : Math.random() * Math.PI * 2;
+  const rad = count <= 12 ? 240 + Math.random() * 60 : Math.sqrt(Math.random()) * (110 * Math.sqrt(count) + 120);
+  return [Math.cos(ang) * rad, Math.sin(ang) * rad * .75];
+}
+/** Adds an aesthetic to the current view in whichever layout is active. Returns the bubble, if any. */
+function place(info, x, y, vx, vy){
+  if (shown.some(i => i.title === info.title)) return null;
+  shown.push(info);
+  if (layout === 'bubbles') return addNode(info, x, y, vx, vy);
+  addCard(info);
+  return null;
+}
+function clearBubbles(){
+  nodes.forEach(n => n.el.remove()); nodes.clear();
+  links.forEach(l => l.el.remove()); links = [];
+}
+function clearView(keepPanel = false){
+  clearBubbles();
+  cards.clear(); gridEl.replaceChildren();
+  shown = [];
+  if (!keepPanel) closePanel();
+}
+
+/* =====================================================================
+   7. Bubble physics, camera, zoom and pan
+   ===================================================================== */
+const view = { s:1, tx:W / 2, ty:H / 2 };
+let activeUntil = 0, frozen = true, manual = false, dragged = false;
+let last = performance.now();
+
+function wake(){ activeUntil = performance.now() + SETTLE_MS; frozen = false; }
+
+/** Pushes overlapping bubbles apart until none overlap (or iterations run out). */
+function separate(arr, iterations){
+  for (let it = 0; it < iterations; it++){
+    let moved = false;
+    for (let i = 0; i < arr.length; i++) for (let j = i + 1; j < arr.length; j++){
+      const a = arr[i], b = arr[j];
+      let dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
+      const min = a.r + b.r + GAP;
+      if (d >= min) continue;
+      if (d < .01){ const t = Math.random() * 6.28; dx = Math.cos(t); dy = Math.sin(t); d = 1; }
+      const push = (min - d) / 2 + .01, nx = dx / d, ny = dy / d;
+      a.x -= nx * push; a.y -= ny * push; b.x += nx * push; b.y += ny * push;
+      moved = true;
+    }
+    if (!moved) return true;
+  }
+  return false;
+}
+function simulate(arr, dt){
+  for (const n of arr){ n.vx -= n.x * .0005 * dt; n.vy -= n.y * .0007 * dt; }
+  for (const l of links){
+    const { a, b } = l;
+    const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || .01;
+    const f = (d - (a.r + b.r + 60)) * .003 * dt, nx = dx / d, ny = dy / d;
+    a.vx += nx * f; a.vy += ny * f; b.vx -= nx * f; b.vy -= ny * f;
+  }
+  for (const n of arr){
+    n.vx *= .86; n.vy *= .86;
+    const sp = Math.hypot(n.vx, n.vy);
+    if (sp > 2.5){ n.vx *= 2.5 / sp; n.vy *= 2.5 / sp; }
+    n.x += n.vx * dt; n.y += n.vy * dt;
+  }
+  separate(arr, 3);
+}
+function draw(arr){
+  for (const n of arr) n.el.style.transform = `translate(${n.x - n.r}px,${n.y - n.r}px)`;
+  for (const l of links){
+    l.el.setAttribute('x1', l.a.x); l.el.setAttribute('y1', l.a.y);
+    l.el.setAttribute('x2', l.b.x); l.el.setAttribute('y2', l.b.y);
+  }
+}
+function camera(arr, dt){
+  if (!arr.length) return;
+  if (!manual){
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const n of arr){ x0 = Math.min(x0, n.x - n.r); y0 = Math.min(y0, n.y - n.r); x1 = Math.max(x1, n.x + n.r); y1 = Math.max(y1, n.y + n.r); }
+    const mobile = W <= 700, open = panel.classList.contains('open');
+    const top = viewInfo.getBoundingClientRect().bottom + 12;
+    const right = !mobile && open ? W - panel.offsetWidth - 24 : W - 24;
+    const bottom = mobile && open ? H * .42 : H - footerEl.offsetHeight - 16;
+    const left = 24;
+    const aw = Math.max(100, right - left), ah = Math.max(100, bottom - top);
+    const s = Math.max(.05, Math.min(1.15, aw / (x1 - x0 + 40), ah / (y1 - y0 + 40)));
+    const k = Math.min(1, .05 * dt);
+    view.s += (s - view.s) * k;
+    view.tx += (left + aw / 2 - ((x0 + x1) / 2) * s - view.tx) * k;
+    view.ty += (top + ah / 2 - ((y0 + y1) / 2) * s - view.ty) * k;
+  }
+  world.style.transform = `translate(${view.tx}px,${view.ty}px) scale(${view.s})`;
+}
+function tick(now){
+  const dt = Math.min(2, (now - last) / 16.67); last = now;
+  const arr = [...nodes.values()];
+  if (!frozen){
+    if (now < activeUntil){
+      // Movement fades out over the last second
+      simulate(arr, dt * (reduce ? .3 : 1) * Math.min(1, (activeUntil - now) / 1000));
+    } else {
+      separate(arr, 500);     // guarantee no overlaps before freezing
+      arr.forEach(n => { n.vx = n.vy = 0; });
+      frozen = true;
+    }
+    draw(arr);
+  }
+  camera(arr, dt);
+  requestAnimationFrame(tick);
+}
+
+function goManual(){ manual = true; fitBtn.hidden = layout !== 'bubbles'; }
+function resetView(){ manual = false; fitBtn.hidden = true; }
+function zoomAt(cx, cy, f){
+  const ns = Math.max(.04, Math.min(3, view.s * f));
+  f = ns / view.s;
+  view.tx = cx - (cx - view.tx) * f; view.ty = cy - (cy - view.ty) * f; view.s = ns;
+}
+fitBtn.addEventListener('click', (e) => { e.stopPropagation(); resetView(); });
+stage.addEventListener('wheel', (e) => {
+  e.preventDefault(); goManual(); closeMenus();
+  zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * (e.ctrlKey ? .01 : .0015)));
+}, { passive:false });
+const pointers = new Map();
+let pinch = null;
+stage.addEventListener('pointerdown', (e) => {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  pointers.set(e.pointerId, { x:e.clientX, y:e.clientY, sx:e.clientX, sy:e.clientY, onBubble:!!e.target.closest('.bubble') });
+  if (pointers.size === 2){
+    const [a, b] = [...pointers.values()];
+    pinch = { d:Math.hypot(a.x - b.x, a.y - b.y), mx:(a.x + b.x) / 2, my:(a.y + b.y) / 2 };
+  }
+});
+stage.addEventListener('pointermove', (e) => {
+  const p = pointers.get(e.pointerId);
+  if (!p) return;
+  const dx = e.clientX - p.x, dy = e.clientY - p.y;
+  p.x = e.clientX; p.y = e.clientY;
+  if (pointers.size === 2 && pinch){
+    const [a, b] = [...pointers.values()];
+    const d = Math.hypot(a.x - b.x, a.y - b.y), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    goManual(); dragged = true;
+    view.tx += mx - pinch.mx; view.ty += my - pinch.my;
+    zoomAt(mx, my, d / (pinch.d || d));
+    pinch = { d, mx, my };
+  } else if (pointers.size === 1 && !p.onBubble){
+    if (!dragged && Math.hypot(e.clientX - p.sx, e.clientY - p.sy) < 5) return;
+    if (!dragged){ dragged = true; stage.classList.add('dragging'); try{ stage.setPointerCapture(e.pointerId); }catch(_){} }
+    goManual();
+    view.tx += dx; view.ty += dy;
+  }
+});
+['pointerup', 'pointercancel'].forEach(ev => stage.addEventListener(ev, (e) => {
+  pointers.delete(e.pointerId);
+  if (pointers.size < 2) pinch = null;
+  if (!pointers.size){ stage.classList.remove('dragging'); setTimeout(() => { dragged = false; }, 0); }
+}));
+stage.addEventListener('click', () => { if (dragged){ dragged = false; return; } closePanel(); });
+gridWrap.addEventListener('click', (e) => { if (!e.target.closest('.card, .pager')) closePanel(); });
+
+/* ---------- Expand and burst (bubbles only) ---------- */
+async function expandNode(n){
+  if (n.expanded || n.loading) return;
+  n.loading = true; n.el.classList.add('loading');
+  try{
+    let candidates = n.info.related.slice();
+    if (candidates.length < MIN_RELATED) n.info.pageLinks.forEach(t => { if (!candidates.includes(t)) candidates.push(t); });
+    candidates = candidates.filter(t => t !== n.title && !SKIP_TITLE.test(t)).slice(0, 14);
+    const pages = candidates.length ? await getPages(candidates) : new Map();
+    if (!nodes.has(n.title)) return;   // burst while loading
+    const found = [];
+    for (const t of candidates){
+      const info = pages.get(t);
+      if (info && info.title !== n.title && !found.some(f => f.title === info.title)) found.push(info);
+      if (found.length >= MAX_RELATED) break;
+    }
+    found.forEach((info, i) => {
+      const existing = nodes.get(info.title);
+      if (existing){ addLink(n, existing); return; }
+      const ang = (i / found.length) * Math.PI * 2 + Math.random() * .4;
+      const kid = place(info, n.x + Math.cos(ang) * 10, n.y + Math.sin(ang) * 10, Math.cos(ang) * 2.5, Math.sin(ang) * 2.5);
+      if (kid) addLink(n, kid);
+    });
+    found.forEach(info => { const m = nodes.get(info.title); if (m) connectRelated(m); });
+    wake();
+    loadThumbs(found);
+    n.expanded = true; n.el.classList.add('expanded');
+    if (!found.length) toast(`No related aesthetics listed for ${n.title}`);
+  }catch(err){
+    console.error(err);
+    toast('Could not reach the wiki. Try again in a moment.');
+  }finally{
+    n.loading = false; n.el.classList.remove('loading');
+    if (panelInfo?.title === n.title) renderPanel();
+  }
+}
+function burst(n){
+  if (panelInfo?.title === n.title) closePanel();
+  nodes.delete(n.title);
+  shown = shown.filter(i => i.title !== n.title);
+  links = links.filter(l => { if (l.a === n || l.b === n){ l.el.remove(); return false; } return true; });
+  const rect = n.el.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+  n.el.style.transition = 'opacity .18s, scale .18s';
+  n.el.style.scale = '1.15'; n.el.style.opacity = '0';
+  setTimeout(() => n.el.remove(), 200);
+  scheduleFonts();
+  if (!nodes.size) showStatus('All popped. Click “Discover random” for more.');
+  if (reduce) return;
+  const colours = n.info.colours.length ? n.info.colours.map(c => c.css) : ['#f58ad2', '#ff9ebb', '#fbd8e7', '#e0679b'];
+  for (let i = 0; i < 16; i++){
+    const s = document.createElement('div');
+    s.className = 'spark';
+    s.style.left = cx + 'px'; s.style.top = cy + 'px';
+    s.style.background = colours[i % colours.length];
+    document.body.appendChild(s);
+    const ang = (i / 16) * Math.PI * 2, dist = rect.width * .7 + Math.random() * 24;
+    s.animate([
+      { transform:'translate(-50%,-50%) scale(1)', opacity:1 },
+      { transform:`translate(calc(-50% + ${Math.cos(ang) * dist}px), calc(-50% + ${Math.sin(ang) * dist}px)) scale(.3)`, opacity:0 }
+    ], { duration:600 + Math.random() * 300, easing:'cubic-bezier(.2,.7,.3,1)' }).onfinish = () => s.remove();
+  }
+}
+
+/* =====================================================================
+   8. Side panel
+   ===================================================================== */
+function markSelected(title){
+  document.querySelectorAll('.bubble.selected, .card.selected').forEach(e => e.classList.remove('selected'));
+  if (!title) return;
+  nodes.get(title)?.el.classList.add('selected');
+  cards.get(title)?.classList.add('selected');
+}
+function openPanel(info, { push = false, keepHistory = false } = {}){
+  if (push && panelInfo) panelHistory.push(panelInfo);
+  else if (!keepHistory) panelHistory = [];
+  panelInfo = info;
+  markSelected(info.title);
+  renderPanel();
+  panel.classList.add('open');
+  appEl.classList.add('panel-open');
+  panel.scrollTop = 0;
+}
+function closePanel(){
+  markSelected(null);
+  panelInfo = null; panelHistory = [];
+  panel.classList.remove('open');
+  appEl.classList.remove('panel-open');
+}
+function panelBack(){
+  const prev = panelHistory.pop();
+  if (prev) openPanel(prev, { keepHistory:true });
+}
+async function openRelated(title, btn){
+  if (btn.classList.contains('busy')) return;
+  btn.classList.add('busy');
+  try{
+    const info = (await getPages([title])).get(title);
+    if (!info){ btn.disabled = true; toast(`No wiki page found for ${title}`); return; }
+    openPanel(info, { push:true });
+  }catch(e){
+    toast('Could not reach the wiki. Try again in a moment.');
+  }finally{ btn.classList.remove('busy'); }
+}
+function relatedList(i){
+  const seen = new Set([i.title.toLowerCase()]);
+  return (i.related.length ? i.related : i.pageLinks.slice(0, 8))
+    .filter(t => !SKIP_TITLE.test(t))
+    .filter(t => { const k = t.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; })
+    .slice(0, 16);
+}
+function renderPanel(){
+  const i = panelInfo;
+  if (!i) return;
+  const rows = [];
+  if (i.decade) rows.push(['Decade of origin', esc(i.decade)]);
+  if (i.origin) rows.push(['Location of origin', esc(i.origin)]);
+  if (i.colours.length) rows.push(['Key colours', `<div class="chips">${i.colours.map(c =>
+    `<span class="chip"><i style="background:${esc(c.css)}"></i>${esc(c.label)}</span>`).join('')}</div>`]);
+  if (i.motifs) rows.push(['Key motifs', esc(i.motifs)]);
+  if (i.values) rows.push(['Key values', esc(i.values)]);
+  const rel = relatedList(i);
+  if (rel.length) rows.push(['Related aesthetics', `<div class="related">${rel.map(t =>
+    `<button type="button" class="rel" data-title="${esc(t)}">${esc(titleCase(t))}</button>`).join('')}</div>`]);
+
+  const n = layout === 'bubbles' ? nodes.get(i.title) : null;
+  let status = '';
+  if (n?.loading) status = 'Blowing related bubbles…';
+  else if (n?.expanded){
+    const c = links.filter(l => l.a === n || l.b === n).length;
+    if (c) status = `${c} connected bubble${c === 1 ? '' : 's'} on screen.`;
+  }
+  const prev = panelHistory[panelHistory.length - 1];
+  const photoClass = i.imageUrl === undefined ? 'pending' : (i.imageKind || '');
+  panelBody.innerHTML = `
+    ${prev ? `<button class="back" id="backBtn" type="button">‹ <span>Back to ${esc(titleCase(prev.title))}</span></button>` : ''}
+    ${i.imageUrl !== null ? `<a class="photo ${photoClass}" id="photo" href="${esc(i.url)}" target="_blank" rel="noopener" aria-label="${esc(i.title)} on the Aesthetics Wiki">
+      ${i.imageUrl ? `<img src="${esc(i.imageUrl)}" alt="${esc(i.title)}" referrerpolicy="no-referrer">` : ''}</a>` : ''}
+    ${i.imageKind ? `<p class="photo-note">${i.imageKind === 'moodboard' ? 'Moodboard' : 'Cover image'} from the Aesthetics Wiki</p>` : ''}
+    <h2>${esc(titleCase(i.title))}</h2>
+    ${i.summary ? `<p class="summary">${esc(i.summary)}</p>` : ''}
+    ${rows.length ? `<dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>` : ''}
+    ${status ? `<div class="panel-status">${status}</div>` : ''}
+    <div class="panel-actions">
+      <button class="ghost" id="bmBtn" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"${isBookmarked(i.title) ? ' style="fill:currentColor"' : ''}><path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>${isBookmarked(i.title) ? 'Bookmarked' : 'Bookmark'}</button>
+      <a class="wiki-link" href="${esc(i.url)}" target="_blank" rel="noopener">Read on the wiki ↗</a>
+    </div>`;
+  $('bmBtn').addEventListener('click', (e) => { e.stopPropagation(); toggleBookmark(i.title); });
+  $('backBtn')?.addEventListener('click', (e) => { e.stopPropagation(); panelBack(); });
+  panelBody.querySelectorAll('.rel').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); openRelated(b.dataset.title, b); }));
+  panelBody.querySelector('#photo img')?.addEventListener('error', () => $('photo')?.remove());
+  if (i.imageUrl === undefined) loadPanelImage(i).then(() => { if (panelInfo === i) renderPanel(); });
+}
+panel.addEventListener('click', (e) => e.stopPropagation());
+$('closePanel').addEventListener('click', (e) => { e.stopPropagation(); closePanel(); });
+
+/* =====================================================================
+   9. Top menu, dropdowns, context menu, layout toggle
+   ===================================================================== */
+let openMenuKey = null;
+function setActiveNav(){
+  navBtns.forEach(b => b.classList.toggle('active',
+    (current.kind === 'bookmarks' && b.dataset.view === 'bookmarks') || (current.kind === 'menu' && b.dataset.menu === current.menu)));
+}
+function placeMenu(el, x, y){
+  const w = el.offsetWidth, h = el.offsetHeight;
+  el.style.left = Math.max(12, Math.min(x, W - w - 12)) + 'px';
+  el.style.top = Math.min(y, H - h - 8) + 'px';
+}
+function openDropdown(btn, key){
+  closeCtx();
+  if (openMenuKey === key) return closeDropdown();
+  openMenuKey = key;
+  navBtns.forEach(b => b.dataset.menu && b.setAttribute('aria-expanded', String(b === btn)));
+  const items = menus[key];
+  dropdown.innerHTML = '';
+  if (items.length > 15){
+    const f = document.createElement('input');
+    f.className = 'dd-filter'; f.type = 'search'; f.placeholder = 'Filter…'; f.setAttribute('aria-label', 'Filter list');
+    f.addEventListener('click', (e) => e.stopPropagation());
+    f.addEventListener('input', () => {
+      const q = f.value.trim().toLowerCase();
+      dropdown.querySelectorAll('.dd-item').forEach(b => { b.hidden = !!q && !b.textContent.toLowerCase().includes(q); });
+      dropdown.querySelectorAll('.dd-head').forEach(h => { h.hidden = !!q; });
+    });
+    dropdown.appendChild(f);
+    setTimeout(() => f.focus({ preventScroll:true }), 0);
+  }
+  items.forEach(item => {
+    if (item.header){
+      const h = document.createElement('div'); h.className = 'dd-head'; h.textContent = item.header;
+      return dropdown.appendChild(h);
+    }
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'dd-item' + (current.item === item ? ' active' : ''); b.textContent = titleCase(item.label);
+    b.addEventListener('click', (e) => { e.stopPropagation(); closeDropdown(); chooseItem(key, item); });
+    dropdown.appendChild(b);
+  });
+  dropdown.classList.add('show');
+  const r = btn.getBoundingClientRect();
+  dropdown.style.maxHeight = (H - r.bottom - 24) + 'px';
+  placeMenu(dropdown, r.left, r.bottom + 8);
+}
+function closeDropdown(){
+  openMenuKey = null;
+  dropdown.classList.remove('show');
+  navBtns.forEach(b => b.dataset.menu && b.setAttribute('aria-expanded', 'false'));
+}
+function openCtx(info, x, y){
+  closeDropdown();
+  ctx.innerHTML = '';
+  const add = (label, fn) => {
+    const b = document.createElement('button');
+    b.className = 'dd-item'; b.type = 'button'; b.textContent = label;
+    b.addEventListener('click', (e) => { e.stopPropagation(); closeCtx(); fn(); });
+    ctx.appendChild(b);
+  };
+  const n = layout === 'bubbles' ? nodes.get(info.title) : null;
+  if (n && !n.expanded && !n.loading) add('Expand', () => expandNode(n));
+  if (n) add('Burst Bubble', () => burst(n));
+  add(isBookmarked(info.title) ? 'Remove Bookmark' : 'Bookmark', () => toggleBookmark(info.title));
+  ctx.classList.add('show');
+  placeMenu(ctx, x, y);
+  ctx.querySelector('button').focus({ preventScroll:true });
+}
+function closeCtx(){ ctx.classList.remove('show'); }
+function closeMenus(){ closeDropdown(); closeCtx(); }
+
+navBtns.forEach(btn => btn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (btn.dataset.menu) return openDropdown(btn, btn.dataset.menu);
+  closeMenus();
+  showBookmarks();
+}));
+$('shuffle').addEventListener('click', (e) => { e.stopPropagation(); closeMenus(); showRandom(); });
+$('nav').addEventListener('scroll', closeDropdown);
+document.addEventListener('click', closeMenus);
+addEventListener('keydown', (e) => { if (e.key === 'Escape'){ closeMenus(); closePanel(); } });
+
+function applyLayoutUI(){
+  const grid = layout === 'grid';
+  segBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.layout === layout)));
+  gridWrap.hidden = !grid;
+  stage.hidden = grid;
+  if (grid) $('gridHead').prepend(viewInfo); else appEl.insertBefore(viewInfo, stage);
+  fitBtn.hidden = grid || !manual;
+  moodBtn.setAttribute('aria-pressed', String(moodOnly));
+  renderLabel();
+  hintEl.textContent = grid
+    ? 'Click a card for details and related aesthetics. Right-click (or long-press) to bookmark.'
+    : 'Click a bubble for details. Right-click (or long-press) to expand, burst or bookmark. Scroll to zoom, drag to pan.';
+}
+function setLayout(l){
+  if (l === layout) return;
+  layout = l;
+  closeMenus();
+  applyLayoutUI();
+  resetView();
+  // Large views switch between paged bubbles and the full grid, so reload them
+  if (current.order && current.order.length > PAGE_LIMIT){
+    current.offset = 0;
+    return showPage(undefined, { keepPanel:true });
+  }
+  const infos = shown;
+  clearView(true);
+  infos.forEach((info, i) => place(info, ...spawnPos(i, infos.length)));
+  nodes.forEach(connectRelated);
+  wake();
+  if (panelInfo){ markSelected(panelInfo.title); renderPanel(); }
+}
+segBtns.forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); setLayout(b.dataset.layout); }));
+moodBtn.addEventListener('click', (e) => {
+  e.stopPropagation(); closeMenus();
+  moodOnly = !moodOnly;
+  store.set(STORE.mood, moodOnly);
+  moodBtn.setAttribute('aria-pressed', String(moodOnly));
+  toast(moodOnly ? 'Moodboard mode on: showing aesthetics with moodboards' : 'Moodboard mode off');
+  scheduleGrid();
+  renderLabel();
+});
+
+/* =====================================================================
+   10. Loading views: random, menu items, bookmarks, paging
+   ===================================================================== */
+let labelText = 'Random', labelExtra = '';
+function setLabel(text, extra){ labelText = text; labelExtra = extra || ''; renderLabel(); }
+function renderLabel(visibleCount){
+  let extra = labelExtra;
+  if (layout === 'grid' && moodOnly && cards.size){
+    const n = visibleCount ?? shown.filter(i => cards.has(i.title) && moodKnown && hasMood(i)).length;
+    extra = `${n} of ${cards.size} with moodboards`;
+  }
+  viewLabel.innerHTML = `Showing <b>${esc(labelText)}</b>${extra ? ' · ' + esc(extra) : ''}`;
+}
+function setDesc(t){ viewDesc.textContent = t || ''; viewDesc.hidden = !t; }
+
+async function load(pool, { id = ++seedId, random = false, keepPanel = false } = {}){
+  clearView(keepPanel);
+  resetView();
+  showStatus('Loading aesthetics…');
+  try{
+    if (!pool.length) return showStatus('No aesthetics found here. Try another option.');
+    if (random){
+      // A few spares, preferring pages that list related aesthetics
+      const pick = sample(pool, RANDOM_COUNT + 8);
+      const pages = await getPages(pick);
+      if (id !== seedId) return;
+      const infos = [...new Map(pick.map(t => pages.get(t)).filter(Boolean).map(x => [x.title, x])).values()]
+        .sort((a, b) => (b.related.length ? 1 : 0) - (a.related.length ? 1 : 0)).slice(0, RANDOM_COUNT);
+      if (!infos.length) return showStatus('No aesthetics found here. Try another option.');
+      infos.forEach((info, i) => place(info, ...spawnPos(i, infos.length)));
+      nodes.forEach(connectRelated);
+      wake();
+      loadThumbs(infos);
+      return showStatus('');
+    }
+    if (layout === 'grid') pool = [...pool].sort((a, b) => a.localeCompare(b, undefined, { sensitivity:'base', numeric:true }));
+    let added = 0;
+    for (const [k, chunk] of chunks(pool).entries()){
+      const pages = await getPages(chunk);
+      if (id !== seedId) return;
+      const infos = chunk.map(t => pages.get(t)).filter(info => info && !shown.some(x => x.title === info.title));
+      const fresh = infos.map((info, i) => place(info, ...spawnPos(added + i, pool.length))).filter(Boolean);
+      fresh.forEach(connectRelated);
+      wake();
+      loadThumbs(infos);
+      added += infos.length;
+      if (added) showStatus('');
+      if (pool.length > 50) toast((k + 1) * 50 < pool.length ? `Loaded ${added} of ${pool.length}…` : `${added} aesthetics loaded`);
+    }
+    if (!added) showStatus('No aesthetics found here. Try another option.');
+  }catch(err){
+    console.error(err);
+    if (id === seedId) showStatus('Couldn’t reach the Aesthetics Wiki. Check your connection and try again.');
+  }
+}
+
+async function showRandom(){
+  current = { kind:'random' };
+  setActiveNav(); setLabel('Random'); setDesc(''); pager.hidden = true;
+  let pool = allTitles;
+  if (layout === 'grid' && moodOnly){
+    const id = ++seedId;
+    clearView(); showStatus('Loading aesthetics…');
+    await moodReady;
+    if (id !== seedId) return;
+    const withMood = [...new Set([...MOOD.keys()].map(k => knownLower.get(k)).filter(Boolean))];
+    if (withMood.length) pool = withMood;
+    return load(pool, { id, random:true });
+  }
+  load(pool, { random:true });
+}
+function showBookmarks(){
+  current = { kind:'bookmarks', order:sample(bookmarks), offset:0 };
+  setActiveNav(); setDesc('');
+  if (!bookmarks.length){
+    setLabel('Bookmarks'); pager.hidden = true; ++seedId; clearView();
+    return showStatus('No bookmarks yet. Right-click a card or bubble to save one.');
+  }
+  showPage();
+}
+async function chooseItem(key, item){
+  current = { kind:'menu', menu:key, item };
+  setActiveNav(); pager.hidden = true;
+  setLabel(`${MENU_NAMES[key]}: ${titleCase(item.label)}`);
+  setDesc('');
+  describe(item).then(d => { if (current.item === item) setDesc(d); });
+  const id = ++seedId;
+  clearView();
+  showStatus('Loading aesthetics…');
+  try{
+    const pool = await resolveItem(item);
+    if (id !== seedId) return;
+    current.order = sample(pool);
+    current.offset = 0;
+    showPage(id);
+  }catch(err){
+    console.error(err);
+    if (id === seedId) showStatus('Couldn’t reach the Aesthetics Wiki. Try again in a moment.');
+  }
+}
+/** Shows the current menu view or bookmarks. Bubbles are paged when large; the grid always shows everything. */
+function showPage(id, opts = {}){
+  const total = current.order.length;
+  const name = current.kind === 'bookmarks' ? 'Bookmarks' : `${MENU_NAMES[current.menu]}: ${titleCase(current.item.label)}`;
+  if (layout === 'grid' || total <= PAGE_LIMIT){
+    pager.hidden = true;
+    setLabel(name, `${total} aesthetic${total === 1 ? '' : 's'}`);
+    return load(current.order, { id, ...opts });
+  }
+  setLabel(name);
+  renderPager(total);
+  return load(current.order.slice(current.offset, current.offset + PAGE_SIZE), { id, ...opts });
+}
+function renderPager(total){
+  const pages = Math.ceil(total / PAGE_SIZE);
+  const cur = Math.floor(current.offset / PAGE_SIZE) + 1;
+  pagerCount.textContent = `${current.offset + 1}–${Math.min(current.offset + PAGE_SIZE, total)} of ${total}`;
+  pagerPages.innerHTML = '';
+  const btn = (label, page, { isCurrent, aria, disabled } = {}) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'pg' + (isCurrent ? ' current' : ''); b.textContent = label;
+    if (aria) b.setAttribute('aria-label', aria);
+    if (isCurrent) b.setAttribute('aria-current', 'page');
+    b.disabled = !!disabled;
+    b.addEventListener('click', (e) => { e.stopPropagation(); goToPage(page); });
+    pagerPages.appendChild(b);
+  };
+  btn('‹', cur - 1, { aria:'Previous page', disabled:cur === 1 });
+  let prev = 0;
+  [...new Set([1, pages, cur - 1, cur, cur + 1])].filter(p => p >= 1 && p <= pages).sort((a, b) => a - b).forEach(p => {
+    if (p - prev > 1){ const g = document.createElement('span'); g.className = 'pg-gap'; g.textContent = '…'; pagerPages.appendChild(g); }
+    btn(String(p), p, { isCurrent:p === cur, aria:`Page ${p}` });
+    prev = p;
+  });
+  btn('›', cur + 1, { aria:'Next page', disabled:cur === pages });
+  pager.hidden = false;
+}
+function goToPage(p){
+  const pages = Math.ceil(current.order.length / PAGE_SIZE);
+  if (p < 1 || p > pages) return;
+  closeMenus();
+  current.offset = (p - 1) * PAGE_SIZE;
+  showPage();
+}
+
+/* =====================================================================
+   11. Boot
+   ===================================================================== */
+applyLayoutUI();
+requestAnimationFrame(tick);
+(async () => {
+  try{
+    await loadTitleList();
+  }catch(err){
+    console.error(err);
+    return showStatus('Couldn’t reach the Aesthetics Wiki. Check your connection and try again.');
+  }
+  loadNav();
+  if (current.kind === 'random') showRandom();
+})();
+})();
+</script>
+</body>
+</html>
