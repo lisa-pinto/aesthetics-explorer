@@ -805,7 +805,15 @@ function sample(arr, k = arr.length){
 function measureTop(){ document.documentElement.style.setProperty('--top-h', headerEl.offsetHeight + 'px'); }
 measureTop();
 if (window.ResizeObserver) new ResizeObserver(measureTop).observe(headerEl);
-addEventListener('resize', () => { W = innerWidth; H = innerHeight; closeMenus(); measureTop(); });
+addEventListener('resize', () => {
+  const widthChanged = innerWidth !== W;
+  W = innerWidth; H = innerHeight;
+  measureTop();
+  // Phones resize the window when the on-screen keyboard opens or the address bar hides,
+  // so only close menus on a real width change; otherwise just re-fit the open dropdown.
+  if (widthChanged) closeMenus();
+  else positionDropdown();
+});
 
 /* ---------- Shared press handling: click opens the panel; right-click or long-press opens actions ---------- */
 function attachPress(el, info){
@@ -1277,7 +1285,13 @@ $('closePanel').addEventListener('click', (e) => { e.stopPropagation(); closePan
 /* =====================================================================
    9. Top menu, dropdowns, context menu, layout toggle
    ===================================================================== */
-let openMenuKey = null;
+let openMenuKey = null, openMenuBtn = null;
+function positionDropdown(){
+  if (!openMenuKey || !openMenuBtn) return;
+  const r = openMenuBtn.getBoundingClientRect();
+  dropdown.style.maxHeight = Math.max(160, H - r.bottom - 24) + 'px';
+  placeMenu(dropdown, r.left, r.bottom + 8);
+}
 function setActiveNav(){
   navBtns.forEach(b => b.classList.toggle('active',
     (current.kind === 'bookmarks' && b.dataset.view === 'bookmarks') || (current.kind === 'menu' && b.dataset.menu === current.menu)));
@@ -1304,7 +1318,7 @@ function openDropdown(btn, key){
       dropdown.querySelectorAll('.dd-head').forEach(h => { h.hidden = !!q; });
     });
     dropdown.appendChild(f);
-    setTimeout(() => f.focus({ preventScroll:true }), 0);
+    if (!matchMedia('(pointer: coarse)').matches) setTimeout(() => f.focus({ preventScroll:true }), 0);
   }
   items.forEach(item => {
     if (item.header){
@@ -1317,9 +1331,8 @@ function openDropdown(btn, key){
     dropdown.appendChild(b);
   });
   dropdown.classList.add('show');
-  const r = btn.getBoundingClientRect();
-  dropdown.style.maxHeight = (H - r.bottom - 24) + 'px';
-  placeMenu(dropdown, r.left, r.bottom + 8);
+  openMenuBtn = btn;
+  positionDropdown();
 }
 function closeDropdown(){
   openMenuKey = null;
@@ -1353,7 +1366,7 @@ navBtns.forEach(btn => btn.addEventListener('click', (e) => {
   showBookmarks();
 }));
 $('shuffle').addEventListener('click', (e) => { e.stopPropagation(); closeMenus(); showRandom(); });
-$('nav').addEventListener('scroll', closeDropdown);
+$('nav').addEventListener('scroll', positionDropdown, { passive:true });
 document.addEventListener('click', closeMenus);
 addEventListener('keydown', (e) => { if (e.key === 'Escape'){ closeMenus(); closePanel(); } });
 
